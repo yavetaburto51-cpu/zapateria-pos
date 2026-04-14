@@ -19,5 +19,7 @@
             @endforeach
         </ul>
 
+        <a href="{{ route('sales.ticket', $sale->id) }}">Descargar Ticket</a>
+
     </div>
 @endforeach

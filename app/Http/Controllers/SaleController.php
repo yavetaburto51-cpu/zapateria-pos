@@ -7,9 +7,20 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
+    public function ticket($id)
+    {
+        $sale = Sale::with('details.product', 'user')->findOrFail($id);
+
+        $pdf = Pdf::loadView('sales.ticket', compact('sale'));
+
+        return $pdf->download('ticket_venta_'.$sale->id.'.pdf');
+    }
+
     public function index()
     {
         $products = Product::all();
@@ -174,6 +185,19 @@ class SaleController extends Controller
             ->get();
 
         return view('reports.top-products', compact('products'));
+    }
+
+    public function dailyReport()
+    {
+        $today = Carbon::today();
+
+        $sales = Sale::whereDate('created_at', $today)->get();
+
+        $total = $sales->sum('total');
+        $count = $sales->count();
+        $average = $count > 0 ? $total / $count : 0;
+
+        return view('reports.daily', compact('sales', 'total', 'count', 'average'));
     }
 
 }

@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales/confirm', [SaleController::class, 'confirmSale'])->name('sales.confirm');
     Route::get('/sales/history', [SaleController::class, 'history'])->name('sales.history');
     Route::get('/reports/top-products', [SaleController::class, 'topProducts'])->name('reports.top');
+    Route::get('/reports/daily', [SaleController::class, 'dailyReport'])->name('reports.daily');
+    Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
 });
 
 Route::get('/admin', function () {
