@@ -200,4 +200,18 @@ class SaleController extends Controller
         return view('reports.daily', compact('sales', 'total', 'count', 'average'));
     }
 
+    public function dashboard()
+    {
+        $today = Carbon::today();
+
+        $salesToday = Sale::whereDate('created_at', $today)->get();
+
+        $totalToday = $salesToday->sum('total');
+        $countToday = $salesToday->count();
+
+        $lowStock = Product::where('stock', '<', 5)->get();
+
+        return view('dashboard', compact('totalToday', 'countToday', 'lowStock'));
+    }
+
 }

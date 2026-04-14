@@ -4,10 +4,19 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    return view('welcome');
+    return Auth::check() ? redirect('/dashboard') : redirect('/login');
 });
+
+Route::get('/', function () {
+    return redirect('/login');
+});
+
+#Route::get('/', function () {
+ #   return view('welcome');
+#});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -28,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/top-products', [SaleController::class, 'topProducts'])->name('reports.top');
     Route::get('/reports/daily', [SaleController::class, 'dailyReport'])->name('reports.daily');
     Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
+    Route::get('/dashboard', [SaleController::class, 'dashboard'])->name('dashboard');
 });
 
 Route::get('/admin', function () {

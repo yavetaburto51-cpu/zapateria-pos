@@ -1,36 +1,38 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Zapatería 3 Hermanos</title>
+    @vite('resources/css/app.css')
+</head>
+<body class="bg-gray-100">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    <nav class="bg-stone-900 text-white px-6 py-4 flex justify-between items-center shadow-lg">
+        
+        <h1 class="text-xl font-bold tracking-wide">
+            👞 Zapatería 3 Hermanos
+        </h1>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
-
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
-
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+        <div class="space-x-6 text-sm">
+            <a href="/products" class="hover:text-amber-400">Productos</a>
+            <a href="/sales" class="hover:text-amber-400">Ventas</a>
+            <a href="/sales/history" class="hover:text-amber-400">Historial</a>
+            <a href="/reports/top-products" class="hover:text-amber-400">Reportes</a>
+            <a href="/reports/daily" class="hover:text-amber-400">Corte</a>
         </div>
-    </body>
+
+        <form method="POST" action="{{ route('logout') }}" class="inline">
+        @csrf
+        <button class="ml-4 bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600">
+            Salir
+        </button>
+    </form>
+
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
+        @yield('content')
+    </div>
+
+</body>
 </html>

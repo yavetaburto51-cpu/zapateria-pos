@@ -1,31 +1,44 @@
-<h1>Editar Producto</h1>
+@extends('layouts.app')
 
-<form action="{{ route('products.update', $product->id) }}" method="POST">
+@section('content')
+
+<h1 class="text-2xl font-bold mb-6">Editar Producto</h1>
+
+<form action="{{ route('products.update', $product->id) }}" method="POST" class="bg-white p-6 rounded-xl shadow-md">
     @csrf
     @method('PUT')
 
-    <label>Modelo:</label>
-    <input type="text" name="model" value="{{ $product->model }}"><br>
+    <div class="grid grid-cols-2 gap-4">
 
-    <label>Talla:</label>
-    <input type="text" name="size" value="{{ $product->size }}"><br>
+        <input type="text" name="model" value="{{ $product->model }}"
+            class="border p-2 rounded w-full" required>
 
-    <label>Género:</label>
-    <input type="text" name="gender" value="{{ $product->gender }}"><br>
+        <input type="number" name="size" value="{{ $product->size }}"
+            class="border p-2 rounded w-full" required>
 
-    <label>Color:</label>
-    <input type="text" name="color" value="{{ $product->color }}"><br>
+        <input type="text" name="gender" value="{{ $product->gender }}"
+            class="border p-2 rounded w-full">
 
-    <label>Precio Compra:</label>
-    <input type="number" step="0.01" name="purchase_price" value="{{ $product->purchase_price }}"><br>
+        <input type="text" name="color" value="{{ $product->color }}"
+            class="border p-2 rounded w-full">
 
-    <label>Precio Venta:</label>
-    <input type="number" step="0.01" name="sale_price" value="{{ $product->sale_price }}"><br>
+        <input type="number" step="0.01" name="purchase_price" value="{{ $product->purchase_price }}"
+            class="border p-2 rounded w-full" required>
 
-    <label>Stock:</label>
-    <input type="number" name="stock" value="{{ $product->stock }}"><br><br>
+        <input type="number" step="0.01" name="sale_price" value="{{ $product->sale_price }}"
+            class="border p-2 rounded w-full" required>
 
-    <button type="submit">Actualizar</button>
+        <input type="number" name="stock" value="{{ $product->stock }}"
+            class="border p-2 rounded w-full" required>
+
+    </div>
+
+    <div class="mt-6 text-right">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow">
+            Actualizar Producto
+        </button>
+    </div>
+
 </form>
 
-<a href="{{ route('products.index') }}">Volver</a>
+@endsection
