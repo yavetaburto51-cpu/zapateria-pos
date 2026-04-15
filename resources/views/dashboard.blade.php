@@ -30,19 +30,23 @@
 <div class="grid grid-cols-4 gap-4 mb-8">
 
     <a href="/sales" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
-        🛒 Nueva Venta
+         Nueva Venta
     </a>
 
     <a href="/products" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
-        📦 Productos
+         Productos
     </a>
 
     <a href="/sales/history" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
-        📊 Historial
+         Historial
     </a>
 
     <a href="/reports/daily" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
-        💰 Corte
+         Corte
+    </a>
+
+    <a href="/reports/top-products" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
+         Más Vendidos
     </a>
 
 </div>

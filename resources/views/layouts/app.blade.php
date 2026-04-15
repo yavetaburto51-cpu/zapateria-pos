@@ -14,11 +14,13 @@
         </h1>
 
         <div class="space-x-6 text-sm">
+            <a href="/dashboard" class="hover:text-amber-400">Home</a>
             <a href="/products" class="hover:text-amber-400">Productos</a>
             <a href="/sales" class="hover:text-amber-400">Ventas</a>
             <a href="/sales/history" class="hover:text-amber-400">Historial</a>
             <a href="/reports/top-products" class="hover:text-amber-400">Reportes</a>
             <a href="/reports/daily" class="hover:text-amber-400">Corte</a>
+            <a href="/reports/top-products" class="hover:text-amber-400">Más Vendidos</a>
         </div>
 
         <form method="POST" action="{{ route('logout') }}" class="inline">
