@@ -23,7 +23,7 @@ class SaleController extends Controller
 
     public function index()
     {
-        $products = Product::all();
+        $products = Product::where('stock', '>', 0)->get();
         $cart = session()->get('cart', []);
 
         return view('sales.index', compact('products', 'cart'));
@@ -37,6 +37,10 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
         DB::beginTransaction();
 
         try {
@@ -44,7 +48,7 @@ class SaleController extends Controller
 
             // Validar stock
             if ($product->stock < $request->quantity) {
-                return back()->with('error', 'Stock insuficiente');
+                return back()->with('error', 'Producto no disponible (sin Stock)');
             }
 
             // Crear venta
@@ -77,7 +81,15 @@ class SaleController extends Controller
 
     public function addToCart(Request $request)
     {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
         $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock < $request->quantity) {
+            return back()->with('error', 'Producto no disponible (sin Stock)');
+        }
         $cart = session()->get('cart', []);
 
         if (isset($cart[$product->id])) {
@@ -135,7 +147,7 @@ class SaleController extends Controller
                 $product = Product::findOrFail($productId);
 
                 if ($product->stock < $item['quantity']) {
-                    throw new \Exception("Stock insuficiente");
+                    throw new \Exception("Producto no disponible (Sin stock)");
                 }
 
                 SaleDetail::create([
@@ -153,12 +165,13 @@ class SaleController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Venta completada');
+            session()->forget('cart');
+
+            return redirect()->back()->with(['success' => 'Venta completada', 'sale_id' => $sale->id]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            #return back()->with('error', $e->getMessage());
-            dd($e->getMessage());
+            return back()->with('error', $e->getMessage());
         }
     }
 
@@ -184,7 +197,25 @@ class SaleController extends Controller
             ->orderByDesc('total_sold')
             ->get();
 
-        return view('reports.top-products', compact('products'));
+        // Indicadores del día
+        $today = Carbon::today();
+        $salesToday = Sale::whereDate('created_at', $today)->get();
+        $totalToday = $salesToday->sum('total');
+        $countToday = $salesToday->count();
+        $averageToday = $countToday > 0 ? $totalToday / $countToday : 0;
+
+        // Ventas semanales (últimos 7 días)
+        $weeklySales = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $sales = Sale::whereDate('created_at', $date)->sum('total');
+            $weeklySales[] = $sales;
+        }
+
+        // Stock bajo
+        $lowStock = Product::where('stock', '<', 5)->get();
+
+        return view('reports.top-products', compact('products', 'totalToday', 'countToday', 'averageToday', 'weeklySales', 'lowStock'));
     }
 
     public function dailyReport()
@@ -202,16 +233,9 @@ class SaleController extends Controller
 
     public function dashboard()
     {
-        $today = Carbon::today();
-
-        $salesToday = Sale::whereDate('created_at', $today)->get();
-
-        $totalToday = $salesToday->sum('total');
-        $countToday = $salesToday->count();
-
         $lowStock = Product::where('stock', '<', 5)->get();
 
-        return view('dashboard', compact('totalToday', 'countToday', 'lowStock'));
+        return view('dashboard', compact('lowStock'));
     }
 
 }

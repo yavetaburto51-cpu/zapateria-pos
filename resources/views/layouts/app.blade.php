@@ -7,34 +7,26 @@
 </head>
 <body class="bg-gray-100">
 
-    <nav class="bg-stone-900 text-white px-6 py-4 flex justify-between items-center shadow-lg">
-        
-        <h1 class="text-xl font-bold tracking-wide">
-            👞 Zapatería 3 Hermanos
-        </h1>
-
-        <div class="space-x-6 text-sm">
+    <nav class="bg-stone-900 text-white px-6 py-4 shadow-lg">
+        <div class="flex justify-between items-center">
             <a href="/dashboard" class="hover:text-amber-400">Home</a>
-            <a href="/products" class="hover:text-amber-400">Productos</a>
-            <a href="/sales" class="hover:text-amber-400">Ventas</a>
-            <a href="/sales/history" class="hover:text-amber-400">Historial</a>
-            <a href="/reports/top-products" class="hover:text-amber-400">Reportes</a>
-            <a href="/reports/daily" class="hover:text-amber-400">Corte</a>
-            <a href="/reports/top-products" class="hover:text-amber-400">Más Vendidos</a>
+            <h1 class="text-xl font-bold tracking-wide text-center flex-1">
+                👞 Zapatería 3 Hermanos
+            </h1>
+            <form method="POST" action="{{ route('logout') }}" class="inline">
+                @csrf
+                <button class="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600">
+                    Logout
+                </button>
+            </form>
         </div>
-
-        <form method="POST" action="{{ route('logout') }}" class="inline">
-        @csrf
-        <button class="ml-4 bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600">
-            Salir
-        </button>
-    </form>
-
     </nav>
 
     <div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
         @yield('content')
     </div>
+
+    @yield('scripts')
 
 </body>
 </html>

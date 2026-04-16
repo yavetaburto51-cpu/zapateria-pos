@@ -4,50 +4,44 @@
 
 <h1 class="text-3xl font-bold mb-6">Panel de Control</h1>
 
-<!-- RESUMEN -->
-<div class="grid grid-cols-3 gap-6 mb-8">
-
-    <div class="bg-green-100 p-6 rounded-xl shadow text-center">
-        <p class="text-gray-600">Ventas del día</p>
-        <h2 class="text-2xl font-bold">${{ number_format($totalToday, 2) }}</h2>
-    </div>
-
-    <div class="bg-blue-100 p-6 rounded-xl shadow text-center">
-        <p class="text-gray-600">Número de ventas</p>
-        <h2 class="text-2xl font-bold">{{ $countToday }}</h2>
-    </div>
-
-    <div class="bg-amber-100 p-6 rounded-xl shadow text-center">
-        <p class="text-gray-600">Promedio</p>
-        <h2 class="text-2xl font-bold">
-            ${{ $countToday > 0 ? number_format($totalToday / $countToday, 2) : 0 }}
-        </h2>
-    </div>
-
-</div>
-
 <!-- ACCESOS RÁPIDOS -->
 <div class="grid grid-cols-4 gap-4 mb-8">
 
+    @if(auth()->user()->isEmployee() || auth()->user()->isAdmin())
     <a href="/sales" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
          Nueva Venta
     </a>
+    @endif
 
+    @if(auth()->user()->isManager() || auth()->user()->isAdmin())
     <a href="/products" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
          Productos
     </a>
+    @endif
 
+    @if(auth()->user()->isManager() || auth()->user()->isOwner() || auth()->user()->isAdmin())
     <a href="/sales/history" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
          Historial
     </a>
+    @endif
 
+    @if(auth()->user()->isManager() || auth()->user()->isAdmin())
     <a href="/reports/daily" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
          Corte
     </a>
+    @endif
 
+    @if(auth()->user()->isManager() || auth()->user()->isOwner() || auth()->user()->isAdmin())
     <a href="/reports/top-products" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
-         Más Vendidos
+         Reportes
     </a>
+    @endif
+
+    @if(auth()->user()->isAdmin() || auth()->user()->isOwner())
+    <a href="/users" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
+         Usuarios
+    </a>
+    @endif
 
 </div>
 

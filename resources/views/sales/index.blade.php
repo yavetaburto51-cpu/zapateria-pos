@@ -4,6 +4,18 @@
 
 <h1 class="text-2xl font-bold mb-4">Nueva Venta</h1>
 
+@if(session('success'))
+<div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+    {{ session('error') }}
+</div>
+@endif
+
 <h3 class="mb-2 font-semibold">Agregar producto</h3>
 
 <form action="{{ route('cart.add') }}" method="POST" class="flex gap-4 mb-6">
@@ -12,12 +24,12 @@
     <select name="product_id" class="border p-2 rounded w-full">
         @foreach($products as $product)
             <option value="{{ $product->id }}">
-                {{ $product->model }} - ${{ $product->sale_price }}
+                {{ $product->model }} - ${{ $product->sale_price }} (Stock: {{ $product->stock }})
             </option>
         @endforeach
     </select>
 
-    <input type="number" name="quantity" class="border p-2 rounded w-32" placeholder="Cantidad" required>
+    <input type="number" name="quantity" class="border p-2 rounded w-32" placeholder="Cantidad" min="1" required>
 
     <button class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded shadow">
         Agregar
@@ -81,6 +93,16 @@
 
 @else
     <p class="text-gray-500">El carrito está vacío</p>
+@endif
+
+@if(session('sale_id'))
+<div class="mt-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded animate-pulse">
+    <p class="font-bold">¡Venta completada!</p>
+    <p>Descarga el ticket de tu venta.</p>
+    <a href="{{ route('sales.ticket', session('sale_id')) }}" class="mt-2 inline-block bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded shadow">
+        Descargar Ticket
+    </a>
+</div>
 @endif
 
 @endsection
