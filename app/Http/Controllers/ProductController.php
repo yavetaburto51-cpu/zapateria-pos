@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
@@ -13,8 +14,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
+
         return view('products.index', compact('products'));
-        
     }
 
     /**
@@ -22,80 +23,51 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
         return view('products.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $request->validate([
-            'model' => 'required',
-            'size' => 'required',
-            'gender' => 'required',
-            'color' => 'required',
-            'purchase_price' => 'required|numeric',
-            'sale_price' => 'required|numeric',
-            'stock' => 'required|integer',
-        ]);
-
-        Product::create($request->all());
+        Product::create($request->validated());
 
         return redirect()->route('products.index')->with('success', 'Producto creado');
-
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Product $product)
     {
-        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Product $product)
     {
-        
-        $product = Product::findOrFail($id);
         return view('products.edit', compact('product'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $request->validate([
-            'model' => 'required',
-            'size' => 'required',
-            'gender' => 'required',
-            'color' => 'required',
-            'purchase_price' => 'required|numeric',
-            'sale_price' => 'required|numeric',
-            'stock' => 'required|integer',
-        ]);
-
-        $product = Product::findOrFail($id);
-        $product->update($request->all());
+        $product->update($request->validated());
 
         return redirect()->route('products.index')->with('success', 'Producto actualizado');
-        
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        $product = Product::findOrFail($id);
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Producto eliminado');    
-
+        return redirect()->route('products.index')->with('success', 'Producto eliminado');
     }
 }
