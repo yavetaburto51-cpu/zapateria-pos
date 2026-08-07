@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -14,6 +14,8 @@ class UserController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny', User::class);
+
         $query = User::query();
 
         if (auth()->user()->isOwner()) {
@@ -30,6 +32,8 @@ class UserController extends Controller
      */
     public function create()
     {
+        Gate::authorize('create', User::class);
+
         return view('users.create');
     }
 
@@ -38,12 +42,9 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+        Gate::authorize('create', User::class);
+
+        User::create($request->validated());
 
         return redirect()->route('users.index')->with('success', 'Usuario creado exitosamente.');
     }
@@ -53,9 +54,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        if (auth()->user()->isOwner() && ($user->isAdmin() || $user->isOwner())) {
-            abort(403);
-        }
+        Gate::authorize('view', $user);
 
         return view('users.show', compact('user'));
     }
@@ -65,9 +64,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        if (auth()->user()->isOwner() && ($user->isAdmin() || $user->isOwner())) {
-            abort(403);
-        }
+        Gate::authorize('update', $user);
 
         return view('users.edit', compact('user'));
     }
@@ -77,19 +74,15 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        if (auth()->user()->isOwner() && ($user->isAdmin() || $user->isOwner())) {
-            abort(403);
+        Gate::authorize('update', $user);
+
+        $data = $request->validated();
+
+        if (empty($data['password'])) {
+            unset($data['password']);
         }
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-        ]);
-
-        if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($request->password)]);
-        }
+        $user->update($data);
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado exitosamente.');
     }
@@ -99,11 +92,10 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->isAdmin() || (auth()->user()->isOwner() && $user->isOwner())) {
-            return redirect()->route('users.index')->with('error', 'No se puede eliminar este usuario.');
-        }
+        Gate::authorize('delete', $user);
 
         $user->delete();
+
         return redirect()->route('users.index')->with('success', 'Usuario eliminado exitosamente.');
     }
 }
