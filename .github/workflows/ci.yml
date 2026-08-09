@@ -51,7 +51,19 @@ jobs:
         run: php -v && composer --version
 
       - name: Install Composer dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      # --- NUEVO: Instalar Node y compilar assets para que Vite genere el manifest.json ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies and Build Assets
+        run: |
+          npm install
+          npm run build
+      # ---------------------------------------------------------------------------------
 
       - name: Prepare environment
         run: |
