@@ -17,52 +17,54 @@ Route::get('/2fa/challenge', [TwoFactorController::class, 'showChallenge'])->nam
 Route::post('/2fa/challenge', [TwoFactorController::class, 'verifyChallenge'])->name('2fa.challenge.verify');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [SaleController::class, 'dashboard'])->name('dashboard');
-
-    // Configuración 2FA
+    // Rutas de onboarding 2FA / gestión de usuario antes de otorgar acceso total.
     Route::get('/2fa/setup', [TwoFactorController::class, 'showEnableForm'])->name('2fa.setup');
     Route::post('/2fa/enable', [TwoFactorController::class, 'enable'])->name('2fa.enable');
     Route::post('/2fa/disable', [TwoFactorController::class, 'disable'])->name('2fa.disable');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::middleware('ensure.2fa.configured')->group(function () {
+        Route::get('/dashboard', [SaleController::class, 'dashboard'])->name('dashboard');
 
-    // Productos: manager y admin
-    Route::middleware('role:manager,admin')->group(function () {
-        Route::resource('products', ProductController::class);
-    });
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Ventas: employee y admin
-    Route::middleware('role:employee,admin')->group(function () {
-        Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
-        Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
-        Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
-        Route::post('/cart/add', [SaleController::class, 'addToCart'])->name('cart.add');
-        Route::post('/cart/remove', [SaleController::class, 'removeFromCart'])->name('cart.remove');
-        Route::post('/sales/confirm', [SaleController::class, 'confirmSale'])->name('sales.confirm');
-        Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
-    });
+        // Productos: manager y admin
+        Route::middleware('role:manager,admin')->group(function () {
+            Route::resource('products', ProductController::class);
+        });
 
-    // Historial: manager, owner, admin
-    Route::middleware('role:manager,owner,admin')->group(function () {
-        Route::get('/sales/history', [SaleController::class, 'history'])->name('sales.history');
-    });
+        // Ventas: employee y admin
+        Route::middleware('role:employee,admin')->group(function () {
+            Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
+            Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+            Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
+            Route::post('/cart/add', [SaleController::class, 'addToCart'])->name('cart.add');
+            Route::post('/cart/remove', [SaleController::class, 'removeFromCart'])->name('cart.remove');
+            Route::post('/sales/confirm', [SaleController::class, 'confirmSale'])->name('sales.confirm');
+            Route::get('/sales/{id}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
+        });
 
-    // Reportes: manager, owner, admin
-    Route::middleware('role:manager,owner,admin')->group(function () {
-        Route::get('/reports/top-products', [SaleController::class, 'topProducts'])->name('reports.top');
-        Route::get('/reports/daily', [SaleController::class, 'dailyReport'])->name('reports.daily');
-    });
+        // Historial: manager, owner, admin
+        Route::middleware('role:manager,owner,admin')->group(function () {
+            Route::get('/sales/history', [SaleController::class, 'history'])->name('sales.history');
+        });
 
-    // Rutas para usuarios, solo para admin y owner
-    Route::middleware('role:admin,owner')->group(function () {
-        Route::resource('users', UserController::class);
+        // Reportes: manager, owner, admin
+        Route::middleware('role:manager,owner,admin')->group(function () {
+            Route::get('/reports/top-products', [SaleController::class, 'topProducts'])->name('reports.top');
+            Route::get('/reports/daily', [SaleController::class, 'dailyReport'])->name('reports.daily');
+        });
+
+        // Rutas para usuarios, solo para admin y owner
+        Route::middleware('role:admin,owner')->group(function () {
+            Route::resource('users', UserController::class);
+        });
     });
 });
 
 Route::get('/admin', function () {
     return "Panel Admin";
-})->middleware(['auth', 'role:admin']);
+})->middleware(['auth', 'role:admin', 'ensure.2fa.configured']);
 
 require __DIR__.'/auth.php';

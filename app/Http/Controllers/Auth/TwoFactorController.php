@@ -57,6 +57,7 @@ class TwoFactorController extends Controller
         if ($valid) {
             $user->two_factor_confirmed_at = now();
             $user->save();
+            session()->forget('2fa:pending_setup');
 
             SecurityLogger::log('2FA_ENABLED', 'El usuario habilitó la autenticación de dos factores (2FA).');
 

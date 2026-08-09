@@ -52,6 +52,35 @@ test('login requires 2fa challenge when enabled', function () {
     $this->assertGuest();
 });
 
+test('user without 2fa is redirected to setup after login', function () {
+    $user = User::factory()->create([
+        'password' => bcrypt('password123'),
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password123',
+    ]);
+
+    $response->assertRedirect('/2fa/setup');
+    $response->assertSessionHas('2fa:pending_setup', true);
+});
+
+test('user with pending 2fa can access setup but not dashboard', function () {
+    $user = User::factory()->create([
+        'password' => bcrypt('password123'),
+    ]);
+
+    $this->actingAs($user);
+    session(['2fa:pending_setup' => true]);
+
+    $response = $this->get('/dashboard');
+    $response->assertRedirect('/2fa/setup');
+
+    $response = $this->get('/2fa/setup');
+    $response->assertStatus(200);
+});
+
 test('2fa challenge rejects invalid code', function () {
     $user = User::factory()->create([
         'two_factor_secret' => 'JBSWY3DPEHPK3PXP',

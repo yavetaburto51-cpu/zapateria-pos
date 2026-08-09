@@ -29,12 +29,20 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Si el usuario tiene 2FA activado, desautenticar temporalmente y requerir desafío 2FA
+        // Si el usuario tiene 2FA ya habilitado, desautenticar temporalmente y solicitar el desafío 2FA.
         if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
             session(['2fa:user_id' => $user->id, '2fa:remember' => $request->boolean('remember')]);
             Auth::logout();
             SecurityLogger::log('AUTH_2FA_REQUIRED', 'Credenciales correctas; solicitando código 2FA.');
             return redirect()->route('2fa.challenge');
+        }
+
+        // Si el usuario aún no tiene 2FA configurado, forzar onboarding antes de permitir acceso completo.
+        if (! $user->two_factor_confirmed_at) {
+            $request->session()->put('2fa:pending_setup', true);
+            $request->session()->regenerate();
+            SecurityLogger::log('AUTH_2FA_ONBOARDING', 'Inicio de sesión exitoso; forzando configuración de 2FA.');
+            return redirect()->route('2fa.setup');
         }
 
         $request->session()->regenerate();
