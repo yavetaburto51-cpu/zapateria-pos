@@ -13,9 +13,6 @@ class EnsureTwoFactorIsSetUp
      */
     public function handle(Request $request, Closure $next)
     {
-        if (app()->environment('testing')) {
-        return $next($request);
-        }
         $user = Auth::user();
 
         if (! $user) {
