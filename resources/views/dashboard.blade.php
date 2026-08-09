@@ -7,6 +7,14 @@
 <!-- ACCESOS RÁPIDOS -->
 <div class="grid grid-cols-4 gap-4 mb-8">
 
+    <a href="{{ route('2fa.challenge') }}" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
+         Verificar 2FA
+    </a>
+
+    <a href="{{ route('2fa.setup') }}" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
+         Configurar 2FA
+    </a>
+
     @if(auth()->user()->isEmployee() || auth()->user()->isAdmin())
     <a href="/sales" class="bg-stone-800 text-white p-4 rounded-lg text-center hover:bg-stone-700">
          Nueva Venta

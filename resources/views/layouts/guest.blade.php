@@ -14,16 +14,19 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="font-sans text-slate-900 antialiased bg-slate-50">
+        <div class="min-h-screen flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-amber-50 via-slate-50 to-slate-100">
+            <div class="w-full sm:max-w-xl">
+                <div class="flex justify-center mb-6">
+                    <a href="/" class="inline-flex items-center gap-3 rounded-full bg-white/90 px-4 py-3 text-slate-900 shadow-sm ring-1 ring-slate-200 transition hover:bg-white">
+                        <x-application-logo class="w-12 h-12 text-amber-500" />
+                        <span class="text-lg font-semibold tracking-tight">Zapatería POS</span>
+                    </a>
+                </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+                <div class="rounded-[2rem] border border-slate-200 bg-white/95 p-6 shadow-[0_25px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur-sm">
+                    {{ $slot }}
+                </div>
             </div>
         </div>
     </body>

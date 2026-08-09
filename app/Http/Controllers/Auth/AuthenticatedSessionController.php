@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Services\SecurityLogger;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -26,7 +27,19 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = Auth::user();
+
+        // Si el usuario tiene 2FA activado, desautenticar temporalmente y requerir desafío 2FA
+        if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
+            session(['2fa:user_id' => $user->id, '2fa:remember' => $request->boolean('remember')]);
+            Auth::logout();
+            SecurityLogger::log('AUTH_2FA_REQUIRED', 'Credenciales correctas; solicitando código 2FA.');
+            return redirect()->route('2fa.challenge');
+        }
+
         $request->session()->regenerate();
+
+        SecurityLogger::log('AUTH_SUCCESS', 'Inicio de sesión exitoso.');
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
@@ -36,6 +49,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        SecurityLogger::log('AUTH_LOGOUT', 'Cierre de sesión.');
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

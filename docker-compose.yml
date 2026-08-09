@@ -1,0 +1,65 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zapateria_app
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=https://localhost
+      - FORCE_HTTPS=true
+    networks:
+      - zapateria_net
+
+  web:
+    image: nginx:alpine
+    container_name: zapateria_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - zapateria_net
+
+  db:
+    image: mysql:8.0
+    container_name: zapateria_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: zapateria_pos
+      MYSQL_ROOT_PASSWORD: secret_root_password
+      MYSQL_USER: zapateria_user
+      MYSQL_PASSWORD: secret_user_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - zapateria_net
+
+  redis:
+    image: redis:alpine
+    container_name: zapateria_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - zapateria_net
+
+networks:
+  zapateria_net:
+    driver: bridge
+
+volumes:
+  db_data:

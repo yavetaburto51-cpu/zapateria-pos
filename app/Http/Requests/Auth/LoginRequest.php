@@ -45,6 +45,10 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            \App\Services\SecurityLogger::log('AUTH_FAILED', 'Intento fallido de inicio de sesión.', [
+                'email' => $this->string('email'),
+            ], 'warning');
+
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
@@ -65,6 +69,10 @@ class LoginRequest extends FormRequest
         }
 
         event(new Lockout($this));
+
+        \App\Services\SecurityLogger::log('AUTH_LOCKOUT', 'Límite de intentos de inicio de sesión excedido. Bloqueo temporal activado.', [
+            'email' => $this->string('email'),
+        ], 'warning');
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
 

@@ -5,25 +5,25 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return Auth::check() ? redirect('/dashboard') : redirect('/login');
 });
 
-Route::get('/', function () {
-    return redirect('/login');
-});
+// Rutas 2FA Desafío (Sin requerir estar autenticado aún)
+Route::get('/2fa/challenge', [TwoFactorController::class, 'showChallenge'])->name('2fa.challenge');
+Route::post('/2fa/challenge', [TwoFactorController::class, 'verifyChallenge'])->name('2fa.challenge.verify');
 
-#Route::get('/', function () {
- #   return view('welcome');
-#});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [SaleController::class, 'dashboard'])->name('dashboard');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    // Configuración 2FA
+    Route::get('/2fa/setup', [TwoFactorController::class, 'showEnableForm'])->name('2fa.setup');
+    Route::post('/2fa/enable', [TwoFactorController::class, 'enable'])->name('2fa.enable');
+    Route::post('/2fa/disable', [TwoFactorController::class, 'disable'])->name('2fa.disable');
 
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -55,8 +55,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/daily', [SaleController::class, 'dailyReport'])->name('reports.daily');
     });
 
-    Route::get('/dashboard', [SaleController::class, 'dashboard'])->name('dashboard');
-
     // Rutas para usuarios, solo para admin y owner
     Route::middleware('role:admin,owner')->group(function () {
         Route::resource('users', UserController::class);
@@ -65,6 +63,6 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/admin', function () {
     return "Panel Admin";
-})->middleware('role:admin');
+})->middleware(['auth', 'role:admin']);
 
 require __DIR__.'/auth.php';
