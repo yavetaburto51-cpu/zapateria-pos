@@ -23,7 +23,10 @@ class SaleController extends Controller
 
     public function index()
     {
-        $products = Product::where('stock', '>', 0)->get();
+        $products = Product::select('id', 'model', 'sale_price', 'stock')
+            ->where('stock', '>', 0)
+            ->orderBy('model', 'asc')
+            ->get();
         $cart = session()->get('cart', []);
 
         return view('sales.index', compact('products', 'cart'));
@@ -195,6 +198,7 @@ class SaleController extends Controller
             )
             ->groupBy('products.model')
             ->orderByDesc('total_sold')
+            ->limit(50)
             ->get();
 
         // Indicadores del día
@@ -202,9 +206,15 @@ class SaleController extends Controller
         $startOfDay = $today->copy()->startOfDay();
         $endOfDay = $today->copy()->endOfDay();
 
-        $salesToday = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])->get();
-        $totalToday = $salesToday->sum('total');
-        $countToday = $salesToday->count();
+        $salesTodayStats = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])
+            ->select(
+                DB::raw('COALESCE(SUM(total), 0) as total_today'),
+                DB::raw('COUNT(*) as count_today')
+            )
+            ->first();
+
+        $totalToday = (float) ($salesTodayStats->total_today ?? 0);
+        $countToday = (int) ($salesTodayStats->count_today ?? 0);
         $averageToday = $countToday > 0 ? $totalToday / $countToday : 0;
 
         // Ventas semanales (últimos 7 días) agrupadas en 1 sola consulta
@@ -232,7 +242,10 @@ class SaleController extends Controller
         }
 
         // Stock bajo
-        $lowStock = Product::where('stock', '<', 5)->get();
+        $lowStock = Product::select('id', 'model', 'stock')
+            ->where('stock', '<', 5)
+            ->limit(50)
+            ->get();
 
         return view('reports.top-products', compact('products', 'totalToday', 'countToday', 'averageToday', 'weeklySales', 'weeklyLabels', 'lowStock'));
     }
@@ -243,18 +256,30 @@ class SaleController extends Controller
         $startOfDay = $today->copy()->startOfDay();
         $endOfDay = $today->copy()->endOfDay();
 
-        $sales = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])->get();
+        $salesStats = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])
+            ->select(
+                DB::raw('COALESCE(SUM(total), 0) as total_sum'),
+                DB::raw('COUNT(*) as total_count')
+            )
+            ->first();
 
-        $total = $sales->sum('total');
-        $count = $sales->count();
+        $total = (float) ($salesStats->total_sum ?? 0);
+        $count = (int) ($salesStats->total_count ?? 0);
         $average = $count > 0 ? $total / $count : 0;
+
+        $sales = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
 
         return view('reports.daily', compact('sales', 'total', 'count', 'average'));
     }
 
     public function dashboard()
     {
-        $lowStock = Product::where('stock', '<', 5)->get();
+        $lowStock = Product::select('id', 'model', 'stock')
+            ->where('stock', '<', 5)
+            ->limit(20)
+            ->get();
 
         $today = Carbon::today();
         $weekStart = $today->copy()->subDays(6)->startOfDay();

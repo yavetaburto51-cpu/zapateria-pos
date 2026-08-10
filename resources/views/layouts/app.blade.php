@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Zapatería 3 Hermanos</title>
+    <title>Zapatería 5 Hermanos</title>
     @vite('resources/css/app.css')
 </head>
 <body class="bg-gray-100">
@@ -11,7 +11,7 @@
         <div class="flex justify-between items-center">
             <a href="/dashboard" class="hover:text-amber-400">Home</a>
             <h1 class="text-xl font-bold tracking-wide text-center flex-1">
-                👞 Zapatería 3 Hermanos
+                 Zapatería 5 Hermanos
             </h1>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
