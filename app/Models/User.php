@@ -53,11 +53,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine whether the user has any of the given roles.
+     */
+    public function hasRole(string|array $roles): bool
+    {
+        $currentRole = strtolower((string) $this->role);
+        $roles = is_array($roles) ? $roles : func_get_args();
+
+        return in_array($currentRole, array_map('strtolower', $roles), true);
+    }
+
+    /**
      * Check if user is admin.
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasRole('admin');
     }
 
     /**
@@ -65,7 +76,7 @@ class User extends Authenticatable
      */
     public function isOwner(): bool
     {
-        return $this->role === 'owner';
+        return $this->hasRole('owner');
     }
 
     /**
@@ -73,7 +84,7 @@ class User extends Authenticatable
      */
     public function isManager(): bool
     {
-        return $this->role === 'manager';
+        return $this->hasRole('manager');
     }
 
     /**
@@ -81,6 +92,6 @@ class User extends Authenticatable
      */
     public function isEmployee(): bool
     {
-        return $this->role === 'employee';
+        return $this->hasRole('employee');
     }
 }

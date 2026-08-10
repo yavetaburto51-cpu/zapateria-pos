@@ -13,13 +13,13 @@
             <div class="space-y-4 rounded-[1.75rem] border border-slate-200 bg-slate-50/90 p-6 shadow-sm shadow-slate-200/50">
                 <div>
                     <x-input-label for="email" :value="__('Correo Electrónico')" class="!text-black font-bold text-sm" />
-                    <x-text-input id="email" class="block mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 !text-black font-medium shadow-sm focus:border-amber-400 focus:ring-amber-200" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                    <x-text-input id="email" class="block mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 font-medium shadow-sm focus:border-amber-400 focus:ring-amber-200" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-red-600" />
                 </div>
 
                 <div>
                     <x-input-label for="password" :value="__('Contraseña')" class="!text-black font-bold text-sm" />
-                    <x-text-input id="password" class="block mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 !text-black font-medium shadow-sm focus:border-amber-400 focus:ring-amber-200" type="password" name="password" required autocomplete="current-password" />
+                    <x-text-input id="password" class="block mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 font-medium shadow-sm focus:border-amber-400 focus:ring-amber-200" type="password" name="password" required autocomplete="current-password" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm text-red-600" />
                 </div>
             </div>

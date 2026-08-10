@@ -235,7 +235,47 @@ class SaleController extends Controller
     {
         $lowStock = Product::where('stock', '<', 5)->get();
 
-        return view('dashboard', compact('lowStock'));
+        $today = Carbon::today();
+        $weekStart = $today->copy()->subDays(6)->startOfDay();
+        $weekEnd = $today->copy()->endOfDay();
+
+        $weeklySalesCount = Sale::whereBetween('created_at', [$weekStart, $weekEnd])->count();
+        $weeklySalesTotal = Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total');
+
+        if (auth()->user()->isEmployee()) {
+            $employeeSales = Sale::where('user_id', auth()->id())
+                ->whereBetween('created_at', [$weekStart, $weekEnd])
+                ->select(
+                    DB::raw('COUNT(*) as sales_count'),
+                    DB::raw('SUM(total) as sales_total')
+                )
+                ->first();
+
+            $employeeSaleRecords = Sale::with('details.product')
+                ->where('user_id', auth()->id())
+                ->whereBetween('created_at', [$weekStart, $weekEnd])
+                ->orderByDesc('created_at')
+                ->get();
+        } else {
+            $employeeSales = Sale::join('users', 'sales.user_id', '=', 'users.id')
+                ->whereBetween('sales.created_at', [$weekStart, $weekEnd])
+                ->select(
+                    'users.id',
+                    'users.name',
+                    DB::raw('COUNT(sales.id) as sales_count'),
+                    DB::raw('SUM(sales.total) as sales_total')
+                )
+                ->groupBy('users.id', 'users.name')
+                ->orderByDesc('sales_total')
+                ->get();
+
+            $employeeSaleRecords = collect();
+        }
+
+        return view(
+            'dashboard',
+            compact('lowStock', 'weeklySalesCount', 'weeklySalesTotal', 'employeeSales', 'employeeSaleRecords')
+        );
     }
 
 }

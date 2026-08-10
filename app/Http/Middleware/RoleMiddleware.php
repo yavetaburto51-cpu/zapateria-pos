@@ -15,7 +15,14 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (!auth()->check() || !in_array(auth()->user()->role, $roles)) {
+        if (!auth()->check()) {
+            abort(403);
+        }
+
+        $userRole = strtolower((string) auth()->user()->role);
+        $normalizedRoles = array_map('strtolower', $roles);
+
+        if (! in_array($userRole, $normalizedRoles, true)) {
             abort(403);
         }
 
