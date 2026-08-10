@@ -69,6 +69,10 @@
     </div>
     @endforeach
 
+    <div class="mt-4">
+        {{ $sales->links() }}
+    </div>
+
 @else
     <p class="text-gray-500">No hay ventas registradas</p>
 @endif

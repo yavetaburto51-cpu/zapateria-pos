@@ -179,7 +179,7 @@ class SaleController extends Controller
     {
         $sales = Sale::with('details.product', 'user')
                     ->orderBy('created_at', 'desc')
-                    ->get();
+                    ->paginate(15);
 
         return view('sales.history', compact('sales'));
     }
@@ -199,30 +199,51 @@ class SaleController extends Controller
 
         // Indicadores del día
         $today = Carbon::today();
-        $salesToday = Sale::whereDate('created_at', $today)->get();
+        $startOfDay = $today->copy()->startOfDay();
+        $endOfDay = $today->copy()->endOfDay();
+
+        $salesToday = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])->get();
         $totalToday = $salesToday->sum('total');
         $countToday = $salesToday->count();
         $averageToday = $countToday > 0 ? $totalToday / $countToday : 0;
 
-        // Ventas semanales (últimos 7 días)
+        // Ventas semanales (últimos 7 días) agrupadas en 1 sola consulta
+        $startDate = Carbon::today()->subDays(6)->startOfDay();
+
+        $dailyTotals = Sale::whereBetween('created_at', [$startDate, $endOfDay])
+            ->select(
+                DB::raw('DATE(created_at) as sale_date'),
+                DB::raw('SUM(total) as daily_total')
+            )
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get()
+            ->mapWithKeys(function ($item) {
+                $dateKey = Carbon::parse($item->sale_date)->format('Y-m-d');
+                return [$dateKey => (float) $item->daily_total];
+            });
+
         $weeklySales = [];
+        $weeklyLabels = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $sales = Sale::whereDate('created_at', $date)->sum('total');
-            $weeklySales[] = $sales;
+            $dateStr = $date->format('Y-m-d');
+            $weeklySales[] = (float) ($dailyTotals[$dateStr] ?? 0);
+            $weeklyLabels[] = $date->format('d/m');
         }
 
         // Stock bajo
         $lowStock = Product::where('stock', '<', 5)->get();
 
-        return view('reports.top-products', compact('products', 'totalToday', 'countToday', 'averageToday', 'weeklySales', 'lowStock'));
+        return view('reports.top-products', compact('products', 'totalToday', 'countToday', 'averageToday', 'weeklySales', 'weeklyLabels', 'lowStock'));
     }
 
     public function dailyReport()
     {
         $today = Carbon::today();
+        $startOfDay = $today->copy()->startOfDay();
+        $endOfDay = $today->copy()->endOfDay();
 
-        $sales = Sale::whereDate('created_at', $today)->get();
+        $sales = Sale::whereBetween('created_at', [$startOfDay, $endOfDay])->get();
 
         $total = $sales->sum('total');
         $count = $sales->count();
